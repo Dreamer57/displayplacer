@@ -39,6 +39,8 @@ int main(int argc, char* argv[]) {
         screenConfigs[i].quietMissingScreen = false;
         screenConfigs[i].modeNum = -1; //set modeNum -1 in case user wants to set and use mode 0
 
+        screenConfigs[i].degree = -1; // dr57
+
         char* propGroup = argv[i + 1];
 
         char* propSetSavePtr = NULL;
@@ -583,6 +585,10 @@ bool setRotations(ScreenConfig* screenConfigs, int argc, CGDirectDisplayID scree
     bool isSuccess = true;
 
     for (int i = 0; i < argc - 1; i++) {
+        // dr57 begin
+        if (screenConfigs[i].degree == -1) {
+            continue; // unset
+        } // dr57 end
         screenConfigs[i].id = convertUUIDtoID(screenConfigs[i].uuid);
         if (!validateScreenOnline(screenList, screenCount, screenConfigs[i].id, screenConfigs[i].uuid, screenConfigs[i].quietMissingScreen)) {
             if (!screenConfigs[i].quietMissingScreen) {
@@ -677,6 +683,11 @@ bool setResolutions(ScreenConfig* screenConfigs, int argc, CGDisplayConfigRef co
         if (!screenConfigs[i].enabled) {
             continue; //screen is disabled, no need to apply other configs for this screen
         }
+
+        // dr57 begin
+        if ((screenConfigs[i].width || screenConfigs[i].height) == 0 && screenConfigs[i].modeNum == -1) {
+            continue; // unset
+        } // dr57 end
 
         isSuccess = setResolution(configRef, screenConfigs[i].id, screenConfigs[i].uuid, screenConfigs[i].width, screenConfigs[i].height, screenConfigs[i].hz, screenConfigs[i].depth, screenConfigs[i].scaled, screenConfigs[i].modeNum) && isSuccess;
     }
